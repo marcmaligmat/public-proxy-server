@@ -1,0 +1,100 @@
+version: "3.9"
+networks:
+  project_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.55.0/24
+          gateway: 192.168.55.1
+
+services:
+  app:
+    container_name: proxy_server_app
+    build:
+      context: .
+      args:
+        - DEV=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+      - dev-static-data:/vol/web
+      - /pipes:/hostpipe
+    command: >
+      sh -c  "python manage.py wait_for_db &&
+              python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASS=changeme
+      - DEBUG=1
+      - ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+    depends_on:
+      - db
+
+
+    networks:
+      project_network:
+        ipv4_address: 192.168.55.10
+
+  db:
+    container_name: proxy_server_postgresdb
+    image: postgres:13-alpine
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=changeme
+    networks:
+      project_network:
+
+  pgadmin:
+    container_name: proxy_server_pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    networks:
+      project_network:
+
+  frontend:
+    image: proxy_server_docker-nextjs-dev
+    container_name: nextjs-app
+    build:
+      context: ./frontend/
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend/pages:/app/pages
+      - ./frontend/public:/app/public
+      - ./frontend/styles:/app/styles
+      - ./frontend/components:/app/components
+      - ./frontend/api_calls:/app/api_calls
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js
+      - ./frontend/postcss.config.js:/app/postcss.config.js
+      - ./frontend/next.config.js:/app/next.config.js
+      - ./frontend/package.json:/app/package.json
+    depends_on:
+      - app
+    environment:
+      - NEXT_PUBLIC_API_HOST=127.0.0.1:8000
+      - SERVERSIDE_API_HOST=192.168.55.10:8000
+      - NEXT_PROTECT_PASSWORD=${NEXT_PROTECT_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+
+    networks:
+      project_network:
+        ipv4_address: 192.168.55.11
+
+
+volumes:
+  dev-db-data:
+  dev-static-data:
+  

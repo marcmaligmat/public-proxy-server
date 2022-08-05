@@ -1,0 +1,85 @@
+
+HOW TO NAMED PIPE DOCKER, HOST
+Answered worked for me is from Vincent
+https://stackoverflow.com/questions/32163955/how-to-run-shell-script-on-host-from-docker-container
+while true; do eval "$(cat /pipes/app_pipe)"; done
+
+ Run docker login -u marcmaligmat
+
+2. At the password prompt, enter the personal access token.
+
+d5f2e7fa-0f5b-4108-9d1d-4e4e3722b907
+
+
+docker exec -it <mycontainer> bash
+
+docker-compose run --rm app sh -c "django-admin startproject app ."
+
+#fixed i
+docker-compose run --rm app sh -c /py/bin/django-admin.py startproject app ."
+
+
+
+docker-compose run --rm app sh -c "python manage.py test"
+
+docker-compose run --rm app sh -c "python manage.py startapp core"
+
+docker-compose run --rm app sh -c "python manage.py wait_for_db"
+
+superuser dev
+admin@example 1234
+
+login container as root
+docker exec -u 0 -it django-app sh
+
+
+Procedure
+Stop the container(s) using the following command:
+docker-compose down
+Delete all containers using the following command:
+docker rm -f $(docker ps -a -q)
+Delete all volumes using the following command:
+docker volume rm $(docker volume ls -q)
+Restart the containers using the following command:
+docker-compose up -d
+
+ 
+docker rmi -f $(docker images -a -q)
+
+
+
+#pinging another container
+docker exec -ti nextjs-app ping django-app
+
+
+#building frontend
+docker-compose -f docker-compose-production.yml build frontend
+
+
+https://simpleisbetterthancomplex.com/tutorial/2016/07/26/how-to-reset-migrations.html
+
+
+
+prompt
+
+run this after reboot
+
+Forward Port
+adb -s R58M88HSMPE forward tcp:45645 tcp:45645
+adb forward --list
+
+#delete forward
+adb forward --remove tcp:8080
+adb forward --remove-all
+
+
+phone name 
+reset ip script
+air fix
+port forward script -> "Forward Port" adb -s R58M88HSMPE forward tcp:45645 tcp:45645
+
+
+curl -H "Content-Type: application/json" -X POST -d '{ "command": "reset_ports" }' http://127.0.0.1:8000/api/device/
+curl -H "Content-Type: application/json" -X POST -d '{ "command": "reset_ports" }' http://69.130.147.123:8000/api/device/
+
+/usr/local/bin/docker-compose -f /home/proxman/clint-proxy-server/docker-compose-production.yml up -d >/dev/null 2>&1 
